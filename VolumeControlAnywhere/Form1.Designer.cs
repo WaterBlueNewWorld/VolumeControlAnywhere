@@ -29,13 +29,40 @@ partial class Form1
     /// </summary>
     private void InitializeComponent()
     {
+        var currentScreen = Screen.FromPoint(Cursor.Position);
+        var screenBounds = currentScreen.WorkingArea;
+        var mousePosition = Cursor.Position;
+        var formWidth = 800;
+        var formHeight = 250;
+
+        int x = mousePosition.X;
+        int y = mousePosition.Y;
+
+        if(x + formWidth > screenBounds.Right)
+        {
+            x = mousePosition.X - formWidth;
+        }
+        if(y + formHeight > screenBounds.Bottom)
+        {
+            y = mousePosition.Y - formHeight;
+        }
+        if(x < screenBounds.Left)
+        {
+            x = screenBounds.Left;
+        }
+        if(y < screenBounds.Top)
+        {
+            y = screenBounds.Top;
+        }
+
         StartPosition = FormStartPosition.Manual;
-        SetDesktopLocation(Cursor.Position.X, Cursor.Position.Y);
+        SetDesktopLocation(x, y);
         components = new System.ComponentModel.Container();
         AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        ClientSize = new System.Drawing.Size(800, 250);
+        ClientSize = new System.Drawing.Size(formWidth, formHeight);
         FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
         Text = "Test volumen";
+
     }
 
     #endregion
