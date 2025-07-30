@@ -1,17 +1,37 @@
-﻿namespace VolumeControlAnywhere.UIElements.MainPage.Widgets;
+﻿using NAudio.CoreAudioApi;
+using VolumeControlAnywhere.Utils.Models;
+
+namespace VolumeControlAnywhere.UIElements.MainPage.Widgets;
 
 public class VolumeSlider
 {
-    private static TrackBar trackBarVolumen;
+    public static List<AppVolume> AppVolumes { get; } = new();
+    public static List<Control>? TrackBarVolumen { get; } = new();
 
-    public static TrackBar TrackBarUI(int maxValue, int minValue, int volumeValue)
+    public static List<Control>? TrackBarUi()
     {
-        trackBarVolumen = new TrackBar();
-        trackBarVolumen.Maximum = maxValue;
-        trackBarVolumen.Minimum = minValue;
-        trackBarVolumen.TickFrequency = 1;
-        trackBarVolumen.Value = volumeValue;
+        foreach (var app in AppVolumes)
+        {
+            TrackBar trackBarVolumenBar = new TrackBar();
+            trackBarVolumenBar.Maximum = app.MaxVolume;
+            trackBarVolumenBar.Minimum = app.MinVolume;
+            trackBarVolumenBar.TickFrequency = 1;
+            trackBarVolumenBar.Value = (int) (app.CurrentVolume * 100);
+            trackBarVolumenBar.Orientation = Orientation.Vertical;
+            trackBarVolumenBar.Width = 300;
+            trackBarVolumenBar.Height = 200;
+            trackBarVolumenBar.ValueChanged += (s, e) => 
+                ChangeVolume(s, e, app.SessionControl);
+            trackBarVolumenBar.Name = "trackBarVolumen";
 
-        return trackBarVolumen;
+            TrackBarVolumen?.Add(trackBarVolumenBar);
+        }
+
+        return TrackBarVolumen;
+    }
+    
+    private static void ChangeVolume(object sender, EventArgs e, AudioSessionControl sessionControl)
+    {
+        sessionControl.SimpleAudioVolume.Volume = ((TrackBar) sender).Value / 100f;
     }
 }

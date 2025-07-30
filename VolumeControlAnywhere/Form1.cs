@@ -1,95 +1,64 @@
 using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
-using NAudio.Wave;
+using VolumeControlAnywhere.UIElements.MainPage.Widgets;
+using VolumeControlAnywhere.Utils.Models;
 using Timer = System.Windows.Forms.Timer;
 using ProcessFilter = VolumeControlAnywhere.Utils.ProcessFilter;
-using BotonPlay = VolumeControlAnywhere.UIElements.MainPage.Widgets.BotonPlay;
-using BotonStop = VolumeControlAnywhere.UIElements.MainPage.Widgets.BotonStop;
-using RenderingStreamListBox = VolumeControlAnywhere.UIElements.MainPage.Widgets.RenderingStreamListBox;
 
 namespace VolumeControlAnywhere;
 
 public partial class Form1 : Form
 {
-    private WaveOutEvent? _outputDevice;
-    private AudioFileReader? _audioFile;
+    private FlowLayoutPanel? _listaProgramas;
+    private List<Control> _trackBarVolumen;
     
     private Timer? _timer;
     public Form1()
     {
+        _listaProgramas = new FlowLayoutPanel
+        {
+            Height = 600,
+            Width = 800,
+            Dock = DockStyle.Fill
+        };
+        _trackBarVolumen = new List<Control>();
         InitializeComponent();
         InicializarListaProgramas();
     }
     
     private void InicializarListaProgramas()
     {
-        var flowPanel = new FlowLayoutPanel();
-        flowPanel.FlowDirection = FlowDirection.LeftToRight;
-        flowPanel.Margin = new Padding(10);
-
-        var botonPlay = BotonPlay.BotonPlayUI(OnButtonPlayClick);
-        flowPanel.Controls.Add(botonPlay);
+        Controls.Add(_listaProgramas);
         
-        var botonStop = BotonStop.BotonStopUI(OnButtonStopClick);
-        flowPanel.Controls.Add(botonStop);
-
-        var listaStreamsAudio = RenderingStreamListBox.ListBoxUI();;
+        // _timer = new Timer();
+        // _timer.Interval = 1000;
+        // _timer.Tick += (s, e) => RefrescarListaProgramas();
+        // _timer.Start();
         
-        Controls.Add(flowPanel);
-        Controls.Add(listaStreamsAudio);
-        FormClosing += OnButtonStopClick;
-        
-        _timer = new Timer();
-        _timer.Interval = 1000;
-        _timer.Tick += (s, e) => RefrescarListaProgramas();
-        _timer.Start();
-        
-        RefrescarListaProgramas();
+        ListOpenApps();
     }
 
-    private void OnButtonPlayClick(object sender, EventArgs e)
+    private void ListOpenApps()
     {
-        if (_outputDevice == null)
+        if (_listaProgramas == null) return;
+        _listaProgramas.Controls.Clear();
+        
+        MMDeviceEnumerator enumDisp = new MMDeviceEnumerator();
+        MMDevice dispositivoPredeterminado = enumDisp.GetDefaultAudioEndpoint(
+            DataFlow.Render,
+            Role.Multimedia
+        );
+        SessionCollection sesionesAudio = dispositivoPredeterminado.AudioSessionManager.Sessions;
+
+        for (int i = 0; i < sesionesAudio.Count; i++)
         {
-            _outputDevice = new WaveOutEvent();
-            _outputDevice.PlaybackStopped += DetenerReproduccion;
-        }
-
-        if (_audioFile == null)
-        {
-            _audioFile = new AudioFileReader(@"C:\Users\alejandro\Desktop\thje real glitter xd.mp3");
-            _outputDevice.Init(_audioFile);;
-        }
-        _outputDevice.Play();
-    }
-
-    private void OnButtonStopClick(object sender, EventArgs e)
-    {
-        _outputDevice?.Stop();
-    }
-
-    private void DetenerReproduccion(object sender, StoppedEventArgs e)
-    {
-        _outputDevice?.Stop();
-        _outputDevice = null;
-        _audioFile?.Dispose();
-        _audioFile = null;
-    }
-
-    private void RefrescarListaProgramas()
-    {
-        RenderingStreamListBox.listaProgramas.Items.Clear();
-        var enumDisp = new MMDeviceEnumerator();
-        var dispositivoPredeterminado = enumDisp.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-
-        var sesionesAudio = dispositivoPredeterminado.AudioSessionManager.Sessions;
-
-        for (int i = 0; i < sesionesAudio.Count; i++) {
             var sesion = sesionesAudio[i];
             if (sesion.State == AudioSessionState.AudioSessionStateActive)
             {
-                RenderingStreamListBox.listaProgramas.Items.Add($"{ProcessFilter.NombreProceso(sesion.GetSessionInstanceIdentifier)} - Volumen: {(sesion.SimpleAudioVolume.Volume * 100):F0}%");
+                VolumeSlider.AppVolumes.Add(new AppVolume(sesion.DisplayName, sesion.SimpleAudioVolume.Volume, sesion));
+                _trackBarVolumen.AddRange(VolumeSlider.TrackBarUi() ?? throw new InvalidOperationException());
             }
         }
+        _listaProgramas.Controls.AddRange(_trackBarVolumen.ToArray());
     }
 }
