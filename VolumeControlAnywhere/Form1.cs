@@ -3,7 +3,7 @@ using NAudio.CoreAudioApi.Interfaces;
 using VolumeControlAnywhere.UIElements.MainPage.Widgets;
 using VolumeControlAnywhere.Utils.Models;
 using Timer = System.Windows.Forms.Timer;
-using ProcessFilter = VolumeControlAnywhere.Utils.ProcessFilter;
+using VolumeControlAnywhere.Utils;
 
 namespace VolumeControlAnywhere;
 
@@ -24,17 +24,42 @@ public partial class Form1 : Form
         _trackBarVolumen = new List<Control>();
         InitializeComponent();
         InicializarListaProgramas();
+        FormClosing += (s, e) =>
+        {
+            // Unregister hotkey if needed
+            GlobalHotkey.UnregisterHotKey(Handle, GlobalHotkey.HOTKEY_ID);
+        };
+        GlobalHotkey.RegisterHotKey(Handle, GlobalHotkey.HOTKEY_ID, GlobalHotkey.MOD_CONTROL | GlobalHotkey.MOD_SHIFT, (int)Keys.B);
+    }
+    
+    protected override void WndProc(ref Message m)
+    {
+        if (m.Msg == GlobalHotkey.WM_HOTKEY && m.WParam.ToInt32() == GlobalHotkey.HOTKEY_ID)
+        {
+            // Handle the hotkey press
+            if (Visible)
+            {
+                Hide();
+            }
+            else
+            {
+                InitializeComponent();
+                Show();
+                BringToFront();
+            }
+        }
+        base.WndProc(ref m);
     }
     
     private void InicializarListaProgramas()
     {
         Controls.Add(_listaProgramas);
-        
+
         // _timer = new Timer();
         // _timer.Interval = 1000;
         // _timer.Tick += (s, e) => RefrescarListaProgramas();
         // _timer.Start();
-        
+
         ListOpenApps();
     }
 
