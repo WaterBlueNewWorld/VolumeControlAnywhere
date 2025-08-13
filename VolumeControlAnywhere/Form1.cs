@@ -27,14 +27,14 @@ public partial class Form1 : Form
         FormClosing += (s, e) =>
         {
             // Unregister hotkey if needed
-            GlobalHotkey.UnregisterHotKey(Handle, GlobalHotkey.HOTKEY_ID);
+            GlobalHotkey.UnregisterHotKey(Handle, GlobalHotkey.HotkeyId);
         };
-        GlobalHotkey.RegisterHotKey(Handle, GlobalHotkey.HOTKEY_ID, GlobalHotkey.MOD_CONTROL | GlobalHotkey.MOD_SHIFT, (int)Keys.B);
+        GlobalHotkey.RegisterHotKey(Handle, GlobalHotkey.HotkeyId, GlobalHotkey.ModControl | GlobalHotkey.ModShift, (int)Keys.B);
     }
     
     protected override void WndProc(ref Message m)
     {
-        if (m.Msg == GlobalHotkey.WM_HOTKEY && m.WParam.ToInt32() == GlobalHotkey.HOTKEY_ID)
+        if (m.Msg == GlobalHotkey.WmHotkey && m.WParam.ToInt32() == GlobalHotkey.HotkeyId)
         {
             // Handle the hotkey press
             if (Visible)
@@ -69,18 +69,18 @@ public partial class Form1 : Form
         _listaProgramas.Controls.Clear();
         
         MMDeviceEnumerator enumDisp = new MMDeviceEnumerator();
-        MMDevice dispositivoPredeterminado = enumDisp.GetDefaultAudioEndpoint(
+        MMDevice defaultDevice = enumDisp.GetDefaultAudioEndpoint(
             DataFlow.Render,
             Role.Multimedia
         );
-        SessionCollection sesionesAudio = dispositivoPredeterminado.AudioSessionManager.Sessions;
+        SessionCollection sessionsAudio = defaultDevice.AudioSessionManager.Sessions;
 
-        for (int i = 0; i < sesionesAudio.Count; i++)
+        for (int i = 0; i < sessionsAudio.Count; i++)
         {
-            var sesion = sesionesAudio[i];
-            if (sesion.State == AudioSessionState.AudioSessionStateActive)
+            var session = sessionsAudio[i];
+            if (session.State == AudioSessionState.AudioSessionStateActive)
             {
-                VolumeSlider.AppVolumes.Add(new AppVolume(sesion.DisplayName, sesion.SimpleAudioVolume.Volume, sesion));
+                VolumeSlider.AppVolumes.Add(new AppVolume(session.DisplayName, session.SimpleAudioVolume.Volume, session));
                 _trackBarVolumen.AddRange(VolumeSlider.TrackBarUi() ?? throw new InvalidOperationException());
             }
         }
