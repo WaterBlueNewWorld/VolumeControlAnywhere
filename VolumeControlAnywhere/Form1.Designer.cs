@@ -1,5 +1,4 @@
 ﻿namespace VolumeControlAnywhere;
-
 partial class Form1
 {
     /// <summary>
@@ -24,46 +23,40 @@ partial class Form1
     #region Windows Form Designer generated code
 
     /// <summary>
-    ///  Required method for Designer support - do not modify
-    ///  the contents of this method with the code editor.
+    /// Required method for Designer support - do not modify
+    /// the contents of this method with the code editor.
     /// </summary>
     private void InitializeComponent()
     {
-        var currentScreen = Screen.FromPoint(Cursor.Position);
-        var screenBounds = currentScreen.WorkingArea;
-        var mousePosition = Cursor.Position;
-        var formWidth = 800;
-        var formHeight = 250;
-
-        int x = mousePosition.X;
-        int y = mousePosition.Y;
-
-        if(x + formWidth > screenBounds.Right)
-        {
-            x = mousePosition.X - formWidth;
-        }
-        if(y + formHeight > screenBounds.Bottom)
-        {
-            y = mousePosition.Y - formHeight;
-        }
-        if(x < screenBounds.Left)
-        {
-            x = screenBounds.Left;
-        }
-        if(y < screenBounds.Top)
-        {
-            y = screenBounds.Top;
-        }
-
-        StartPosition = FormStartPosition.Manual;
-        SetDesktopLocation(x, y);
-        components = new System.ComponentModel.Container();
+        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+        deviceSelector = new System.Windows.Forms.ComboBox();
+        SuspendLayout();
+        // 
+        // deviceSelector
+        // 
+        deviceSelector.FormattingEnabled = true;
+        deviceSelector.Location = new System.Drawing.Point(12, 250);
+        deviceSelector.Name = "deviceSelector";
+        deviceSelector.Size = new System.Drawing.Size(219, 23);
+        deviceSelector.TabIndex = 0;
+        // 
+        // Form1
+        // 
+        AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
         AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        ClientSize = new System.Drawing.Size(formWidth, formHeight);
+        BackColor = System.Drawing.SystemColors.ControlDarkDark;
+        BackgroundImage = ((System.Drawing.Image)resources.GetObject("$this.BackgroundImage"));
+        BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+        ClientSize = new System.Drawing.Size(848, 285);
+        Controls.Add(deviceSelector);
+        DoubleBuffered = true;
         FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-        Text = "Test volumen";
-
+        Location = new System.Drawing.Point(500, 300);
+        StartPosition = System.Windows.Forms.FormStartPosition.Manual;
+        ResumeLayout(false);
     }
+
+    private System.Windows.Forms.ComboBox deviceSelector;
 
     #endregion
 }
